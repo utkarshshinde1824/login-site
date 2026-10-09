@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #14213d;
+    --paper: #f3f5fa;
+    --panel: #ffffff;
+    --accent: #2f5bea;
+    --muted: #5d6b86;
+    --line: #d5dbe8;
+    --error: #b3261e;
+    --ok: #17703f;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: "Sora", system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .brand {
+    background: var(--ink);
+    color: #fff;
+    display: flex;
+    align-items: flex-end;
+    padding: 56px;
+  }
+  .brand h1 {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    line-height: 1.05;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+  .brand p { color: #aab6d3; margin: 16px 0 0; max-width: 32ch; line-height: 1.6; }
+  main { display: grid; place-items: center; padding: 32px; }
+  form { width: 100%; max-width: 380px; }
+  h2 { font-size: 1.6rem; margin: 0 0 6px; letter-spacing: -0.02em; }
+  .sub { color: var(--muted); margin: 0 0 28px; font-size: .95rem; }
+  label { display: block; font-size: .85rem; font-weight: 600; margin: 18px 0 6px; }
+  .field { position: relative; }
+  input[type="email"], input[type="password"], input[type="text"] {
+    width: 100%;
+    padding: 13px 14px;
+    font: inherit;
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    background: var(--panel);
+    color: var(--ink);
+  }
+  input:focus-visible, button:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    outline-offset: 1px;
+    border-color: var(--accent);
+  }
+  .toggle {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    background: none; border: 0; color: var(--accent); font: inherit;
+    font-size: .8rem; font-weight: 600; cursor: pointer; padding: 6px 8px;
+  }
+  .row { display: flex; justify-content: space-between; align-items: center; margin: 18px 0 24px; font-size: .85rem; }
+  .row label { display: flex; align-items: center; gap: 8px; margin: 0; font-weight: 400; }
+  .row a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .submit {
+    width: 100%; padding: 14px; font: inherit; font-weight: 600;
+    background: var(--accent); color: #fff; border: 0; border-radius: 8px; cursor: pointer;
+    transition: background .15s;
+  }
+  .submit:hover { background: #2349c4; }
+  #msg { min-height: 1.4em; margin: 16px 0 0; font-size: .9rem; }
+  #msg.error { color: var(--error); }
+  #msg.ok { color: var(--ok); }
+  .foot { margin-top: 28px; font-size: .85rem; color: var(--muted); }
+  .foot a { color: var(--accent); font-weight: 600; text-decoration: none; }
+  @media (max-width: 760px) {
+    body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .brand { padding: 32px 24px; }
+    .brand p { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+  <aside class="brand">
+    <div>
+      <h1>Welcome back.</h1>
+      <p>Sign in to pick up where you left off.</p>
+    </div>
+  </aside>
+
+  <main>
+    <form id="login" novalidate>
+      <h2>Sign in</h2>
+      <p class="sub">Use your email and password.</p>
+
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="email" placeholder="you@example.com" required>
+
+      <label for="password">Password</label>
+      <div class="field">
+        <input id="password" type="password" autocomplete="current-password" required>
+        <button type="button" class="toggle" id="toggle" aria-label="Show password">Show</button>
+      </div>
+
+      <div class="row">
+        <label><input type="checkbox" id="remember"> Remember me</label>
+        <a href="#">Forgot password?</a>
+      </div>
+
+      <button class="submit" type="submit">Sign in</button>
+      <p id="msg" role="status" aria-live="polite"></p>
+
+      <p class="foot">New here? <a href="#">Create an account</a></p>
+    </form>
+  </main>
+
+<script>
+  const form = document.getElementById("login");
+  const email = document.getElementById("email");
+  const password = document.getElementById("password");
+  const msg = document.getElementById("msg");
+  const toggle = document.getElementById("toggle");
+
+  toggle.addEventListener("click", () => {
+    const show = password.type === "password";
+    password.type = show ? "text" : "password";
+    toggle.textContent = show ? "Hide" : "Show";
+    toggle.setAttribute("aria-label", show ? "Hide password" : "Show password");
+  });
+
+  function say(text, type) { msg.textContent = text; msg.className = type; }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!/^\S+@\S+\.\S+$/.test(email.value)) return say("Enter a valid email address.", "error");
+    if (password.value.length < 6) return say("Password must be at least 6 characters.", "error");
+
+    // DEMO ONLY: replace with a real call to your backend / auth service.
+    // Example: fetch("/api/login", { method: "POST", body: JSON.stringify({...}) })
+    if (email.value === "demo@example.com" && password.value === "password123") {
+      say("Signed in. Redirecting…", "ok");
+    } else {
+      say("Email or password is incorrect. Try demo@example.com / password123.", "error");
+    }
+  });
+</script>
+</body>
+</html>
